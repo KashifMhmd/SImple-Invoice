@@ -39,7 +39,6 @@ const Login = () => {
         data: res.data.access_token,
       });
     } catch (error) {
-      navigation.navigate('ListView');
       console.log('err', error);
       Alert.alert('something went wrong please try again');
     }
