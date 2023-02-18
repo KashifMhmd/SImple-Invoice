@@ -9,11 +9,11 @@ import React, {useState} from 'react';
 import axios from 'axios';
 import {baseUrl} from '../../Helpers/Config';
 import {useSelector} from 'react-redux';
-
+import mockData from '../Home/ListView/Mockdata.json';
 const AddInovice = ({route, navigation}) => {
   //getting data from store
   const userData = useSelector(state => state.userProfile.userData);
-
+  console.log('y', userData);
   const [invoiceRef, setInvoiceRef] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
@@ -25,6 +25,14 @@ const AddInovice = ({route, navigation}) => {
       description: description,
       totalAMount: amount,
     };
+    const mockBody = {
+      amount: amount,
+      referenceNumber: invoiceRef,
+      invoiceDate: date,
+      dueDate: '2022-04-30',
+      invoiceNumber: '',
+    };
+    mockData.invoices.push(mockBody);
     const config = {
       headers: {
         Authorization: 'Bearer' + ' ' + userData.accessToken,
@@ -40,6 +48,8 @@ const AddInovice = ({route, navigation}) => {
       navigation.goBack();
       console.log('res', res);
     } catch (error) {
+      navigation.goBack();
+
       console.log('err', error);
     }
   };

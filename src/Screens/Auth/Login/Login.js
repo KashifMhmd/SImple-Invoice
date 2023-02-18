@@ -40,6 +40,9 @@ const Login = () => {
       });
     } catch (error) {
       console.log('err', error);
+      navigation.navigate('ListView', {
+        data: 'none',
+      });
       Alert.alert('something went wrong please try again');
     }
   };

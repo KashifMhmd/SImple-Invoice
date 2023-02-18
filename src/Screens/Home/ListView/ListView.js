@@ -15,6 +15,7 @@ import {baseUrl} from '../../../Helpers/Config';
 import {useIsFocused} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
 import {userDataCollector} from '../../../Reducers/userProfileData';
+import mockData from './Mockdata.json';
 const height = Dimensions.get('screen').height;
 const width = Dimensions.get('screen').width;
 
@@ -23,7 +24,7 @@ const ListView = ({navigation, route}) => {
   const {data} = route.params;
   const dispatch = useDispatch();
   const [invoiceSearchQuery, setInvoiceSearchQuery] = useState('');
-  const [invoicesData, setInvoicesData] = useState([]);
+  const [invoicesData, setInvoicesData] = useState(mockData.invoices);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [orgToken, setOrgToken] = useState('');
   let filteredInvoices;
@@ -34,14 +35,10 @@ const ListView = ({navigation, route}) => {
       );
       setIsModalVisible(!isModalVisible);
     } else if (data === 'high-low') {
-      filteredInvoices = invoicesData.sort(
-        (a, b) => b.totalAmount - a.totalAmount,
-      );
+      filteredInvoices = invoicesData.sort((a, b) => b.amount - a.amount);
       setIsModalVisible(!isModalVisible);
     } else if (data === 'low-high') {
-      filteredInvoices = invoicesData.sort(
-        (a, b) => a.totalAmount - b.totalAmount,
-      );
+      filteredInvoices = invoicesData.sort((a, b) => a.amount - b.amount);
       setIsModalVisible(!isModalVisible);
     } else {
       setIsModalVisible(!isModalVisible);
@@ -101,17 +98,16 @@ const ListView = ({navigation, route}) => {
 
   // for saerch bar to filter data through name and status
   // also sorting it with names in ascending order through local compare
-  filteredInvoices = invoicesData
-    .filter(
-      invoice =>
-        invoice.invoiceReference
-          .toLowerCase()
-          .includes(invoiceSearchQuery.toLowerCase()) ||
-        invoice.invoiceNumber
-          .toLowerCase()
-          .includes(invoiceSearchQuery.toLowerCase()),
-    )
-    .sort((a, b) => a.invoiceNumber.localeCompare(b.customer_name));
+  filteredInvoices = invoicesData.filter(
+    invoice =>
+      invoice.referenceNumber
+        .toLowerCase()
+        .includes(invoiceSearchQuery.toLowerCase()) ||
+      invoice.invoiceNumber
+        .toLowerCase()
+        .includes(invoiceSearchQuery.toLowerCase()),
+  );
+
   useEffect(() => {
     getUserProfile();
     console.log('refresh');
@@ -130,7 +126,7 @@ const ListView = ({navigation, route}) => {
           onChangeText={handleInvoiceSearch}
           value={invoiceSearchQuery}
         />
-        {isModalVisible ? (
+        <Modal style={styles.modal} visible={isModalVisible}>
           <View style={styles.modal}>
             <TouchableOpacity onPress={() => toggleModal('date')}>
               <Text>Newest</Text>
@@ -145,27 +141,27 @@ const ListView = ({navigation, route}) => {
               <Text>Close</Text>
             </TouchableOpacity>
           </View>
-        ) : (
-          <TouchableOpacity style={styles.toggler} onPress={toggleModal}>
-            <Text>Filter</Text>
-          </TouchableOpacity>
-        )}
+        </Modal>
+
+        <TouchableOpacity style={styles.toggler} onPress={toggleModal}>
+          <Text>Filter</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView
         contentContainerStyle={styles.scrollcontainer}
-        style={{
-          flexGrow: 1,
-        }}>
+        // style={{
+        //   flexGrow: 1,
+        // }}
+      >
         {filteredInvoices?.map((data, id) => {
           return (
-            <View key={id} style={styles.listInvoices}>
+            <View key={data.id} style={styles.listInvoices}>
               <Text>
-                {'invoiceRef: '} {data.invoiceReference}
+                {'invoiceRef: '} {data.referenceNumber}
                 {'\n'}
                 {'Total Amount: '}
-                {data.currencySymbol}
-                {data.totalAmount}
+                {data.amount}
                 {'\n'}
                 {'desc: '} {data.description}
                 {'\n'}
@@ -176,8 +172,6 @@ const ListView = ({navigation, route}) => {
                 {'Due Date: '}
                 {data.dueDate}
               </Text>
-
-              <Text>{data.createdAt.substring(0, 10)}</Text>
             </View>
           );
         })}
@@ -190,10 +184,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 20,
-    width: width / 2.5,
+    width: width / 2,
   },
   searchBox: {
     height: 40,
+    width: '70%',
     borderColor: '#ccc',
     borderWidth: 1,
     borderRadius: 4,
@@ -201,7 +196,7 @@ const styles = StyleSheet.create({
   },
   listInvoices: {
     width: width / 1.1,
-    height: 150,
+    height: 100,
     borderWidth: 1,
     borderRadius: 20,
     padding: '2%',
@@ -212,6 +207,7 @@ const styles = StyleSheet.create({
   scrollcontainer: {
     alignItems: 'center',
     width: width,
+    height: height,
   },
   toggler: {
     backgroundColor: 'grey',
@@ -231,6 +227,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: width,
     height: height,
+    flex: 1,
   },
 });
 export default ListView;
